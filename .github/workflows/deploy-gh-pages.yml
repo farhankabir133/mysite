@@ -1,0 +1,77 @@
+name: Build and deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build site (reads VITE_/NEXT_PUBLIC_ secrets)
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
+          VITE_WALLETCONNECT_PROJECT_ID: ${{ secrets.VITE_WALLETCONNECT_PROJECT_ID }}
+        run: npm run build
+
+      - name: Create CNAME if provided
+        run: |
+          if [ -n "${{ secrets.CUSTOM_DOMAIN }}" ]; then
+            echo "${{ secrets.CUSTOM_DOMAIN }}" > dist/CNAME
+            echo "Wrote CNAME: ${{ secrets.CUSTOM_DOMAIN }}"
+          else
+            echo "No CUSTOM_DOMAIN secret set; skipping CNAME write."
+          fi
+
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          publish_branch: gh-pages
+          user_name: 'github-actions[bot]'
+          user_email: '41898282+github-actions[bot]@users.noreply.github.com'
+          allow_empty_commit: true
+
+      - name: Smoke test deployed site
+        if: success()
+        env:
+          CUSTOM_DOMAIN: ${{ secrets.CUSTOM_DOMAIN }}
+        run: |
+          set -e
+          # Use the CUSTOM_DOMAIN secret if provided, otherwise try gh-pages URL
+          if [ -n "$CUSTOM_DOMAIN" ]; then
+            URL="https://$CUSTOM_DOMAIN"
+          else
+            # Derive the pages URL from repository (owner/repo)
+            REPO_OWNER=${{ github.repository_owner }}
+            REPO_NAME=$(basename "$GITHUB_REPOSITORY")
+            URL="https://${REPO_OWNER}.github.io/${REPO_NAME}/"
+          fi
+          echo "Checking deployed site at: $URL"
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
+          echo "HTTP status: $HTTP_STATUS"
+          if [ "$HTTP_STATUS" -ne 200 ]; then
+            echo "Smoke test failed: $URL returned $HTTP_STATUS" >&2
+            exit 1
+          fi

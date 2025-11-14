@@ -4,9 +4,14 @@ import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  // Base public path when served from GitHub Pages under a repository named `fkhub`.
-  // Adjust when deploying to a different repo or to a GitHub Pages user site.
-  base: '/fkhub/',
+  // Base public path. Historically this project set the base to '/mysite/'
+  // for GitHub Pages when serving from https://<user>.github.io/mysite/.
+  // When a custom domain (or user-pages root) is used the base should be
+  // '/' (or the root). To make deployments flexible we allow overriding
+  // the base with the VITE_BASE environment variable. Examples:
+  //  - default (custom domain or user site): VITE_BASE not set -> '/'
+  //  - GitHub Pages project site: VITE_BASE=/mysite/ npm run build
+  base: process.env.VITE_BASE || '/',
   plugins: [react()],
   resolve: {
     alias: {
@@ -21,18 +26,21 @@ export default defineConfig({
     exclude: ['lucide-react'],
   },
   build: {
+    // Enable source maps for the debug branch only. This flag will be
+    // set to true in the `debug/sourcemaps` branch to aid debugging.
+    // Keep false in production/main to avoid exposing source maps.
+    // (This file will be modified on a debug branch by CI/automation.)
+    sourcemap: false,
     rollupOptions: {
       output: {
+        // Bundle all node_modules into a single vendor chunk. This reduces the
+        // chance of cross-chunk circular imports triggering "Cannot access
+        // '<id>' before initialization" at runtime. If you later need fine-
+        // grained caching for individual large libs, reintroduce manual
+        // splitting carefully.
         manualChunks(id) {
           if (!id) return;
           if (id.includes('node_modules')) {
-            if (id.includes('framer-motion')) return 'vendor-framer-motion';
-            if (id.includes('wagmi') || id.includes('@wagmi')) return 'vendor-wagmi';
-            if (id.includes('viem')) return 'vendor-viem';
-            if (id.includes('lottie-react') || id.includes('lottie-web')) return 'vendor-lottie';
-            if (id.includes('@web3modal')) return 'vendor-web3modal';
-            if (id.includes('react') || id.includes('react-dom')) return 'vendor-react';
-            if (id.includes('lucide-react') || id.includes('react-icons')) return 'vendor-icons';
             return 'vendor';
           }
         },
