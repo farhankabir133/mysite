@@ -26,11 +26,11 @@ export default defineConfig({
     exclude: ['lucide-react'],
   },
   build: {
-    // Enable source maps for the debug branch only. This flag will be
-    // set to true in the `debug/sourcemaps` branch to aid debugging.
-    // Keep false in production/main to avoid exposing source maps.
-    // (This file will be modified on a debug branch by CI/automation.)
-    sourcemap: false,
+  // Temporarily enable source maps for debugging so stack traces from the
+  // runtime overlay map back to original source files. We'll revert this
+  // when debugging is finished to avoid exposing source maps in long-term
+  // production builds.
+  sourcemap: true,
     rollupOptions: {
       output: {
         // Bundle all node_modules into a single vendor chunk. This reduces the
