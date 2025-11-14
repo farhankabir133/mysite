@@ -20,10 +20,9 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        # Use npm install in CI to avoid failing when a lockfile is missing
-        # (some checkout configurations or generated repos may not include
-        # package-lock.json). npm ci is faster but requires a lockfile.
-        run: npm install
+        # Use npm install with legacy peer deps to avoid conflicts during CI
+        # when package overrides or peer dependency mismatches exist.
+        run: npm install --legacy-peer-deps
 
       - name: Build site (reads VITE_/NEXT_PUBLIC_ secrets)
         env:
