@@ -20,7 +20,10 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        # Use npm install in CI to avoid failing when a lockfile is missing
+        # (some checkout configurations or generated repos may not include
+        # package-lock.json). npm ci is faster but requires a lockfile.
+        run: npm install
 
       - name: Build site (reads VITE_/NEXT_PUBLIC_ secrets)
         env:
