@@ -48,7 +48,12 @@ jobs:
       - name: Deploy to gh-pages
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # Use a personal access token (PAT) if provided via the GH_PAGES_PAT
+          # secret. This is necessary in repositories where the default
+          # GITHUB_TOKEN does not have permission to push to the
+          # gh-pages branch (organization policies or repo settings).
+          # If GH_PAGES_PAT is not set, fall back to the default GITHUB_TOKEN.
+          github_token: ${{ secrets.GH_PAGES_PAT || secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
           publish_branch: gh-pages
           user_name: 'github-actions[bot]'
