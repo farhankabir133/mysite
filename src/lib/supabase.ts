@@ -1,7 +1,14 @@
+// Importing the Supabase client only when needed avoids noisy warnings
+// in production on static hosts. We still support initializing the
+// client when env vars are present, but only warn during development.
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Support both VITE_* and common NEXT_PUBLIC_* env var names so users who
+// set their variables with different prefixes (for example when migrating
+// from Next.js) still have a working client. Vite exposes env vars via
+// import.meta.env at build time.
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || import.meta.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 // Initialize supabase client safely: don't throw during module import
 // if env vars are missing or malformed. Instead, export `null` and
@@ -9,8 +16,17 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 let _supabase: any = null;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn('Missing Supabase environment variables; supabase client not initialized.');
+  // Avoid noisy warnings on production/public sites. Only warn during
+  // development so local devs get helpful messages while visitors on
+  // your published site won't see the console warning.
+  if (import.meta.env.DEV) {
+    console.warn('Missing Supabase environment variables; supabase client not initialized. Expected VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY (or NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY).');
+  }
 } else {
+  // Log which env vars were consumed (non-sensitive info) for easier debugging
+  try {
+    console.info('Initializing Supabase client with URL:', supabaseUrl ? '(provided)' : '(missing)');
+  } catch (e) { /* noop */ }
   try {
     _supabase = createClient(supabaseUrl, supabaseAnonKey);
   } catch (err) {
