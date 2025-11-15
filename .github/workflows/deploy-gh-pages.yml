@@ -46,12 +46,12 @@ jobs:
           fi
 
       - name: Upload built site as Pages artifact
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-pages-artifact@v2
         with:
           path: ./dist
 
       - name: Deploy to GitHub Pages (via Pages API)
-        uses: actions/deploy-pages@v1
+        uses: actions/deploy-pages@v2
         # This action uses the workflow's GITHUB_TOKEN and the Pages API
         # to create a deployment; it avoids doing a direct git push and
         # therefore does not require a PAT. If your organization blocks
