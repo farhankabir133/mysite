@@ -1,20 +1,20 @@
-const { onRequest } = require("firebase-functions/v2/https");
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+// =======================================================
+// FK-Bot Backend Functions (Standalone Node.js)
+// =======================================================
+
+const express = require("express");
+const cors = require("cors");
+const fetch = global.fetch || require("node-fetch");
 const nodemailer = require("nodemailer");
 const { getSystemPrompt } = require("./chatbot_personality");
 
-// -----------------------------
-// Helper function to set CORS headers
-// -----------------------------
-const setCorsHeaders = (res) => {
-  res.set("Access-Control-Allow-Origin", "*");
-  res.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  res.set("Access-Control-Allow-Headers", "Content-Type");
-};
+const app = express();
+app.use(cors()); // Allow cross-origin requests
+app.use(express.json()); // Parse JSON bodies
 
-// -----------------------------
-// KB Integration Function
-// -----------------------------
+// =======================================================
+// Helper: Knowledge Base Context
+// =======================================================
 async function getKBContext(userMessage) {
   const kbEntries = [
     "Farhan Kabir is a full-stack software developer.",
@@ -25,79 +25,89 @@ async function getKBContext(userMessage) {
   return kbEntries.join("\n");
 }
 
-// -----------------------------
-// Gemini Chatbot Endpoint
-// -----------------------------
-exports.getGeminiResponse = onRequest({ secrets: ["GEMINI_API_KEY"] }, async (req, res) => {
-  setCorsHeaders(res);
-
-  if (req.method === "OPTIONS") {
-    res.status(204).send("");
-    return;
-  }
-
+// =======================================================
+// Chatbot Endpoint (DigitalOcean Agent)
+// =======================================================
+app.post("/api/chat", async (req, res) => {
   if (!req.body || !req.body.message) {
-    res.status(400).send({ error: 'Missing "message" in request body' });
-    return;
+    return res.status(400).json({ error: 'Missing "message" in request body' });
   }
 
   const { message } = req.body;
 
   try {
-    const geminiKey = process.env.GEMINI_API_KEY;
-    if (!geminiKey) throw new Error("GEMINI_API_KEY is not set");
-
-    const genAI = new GoogleGenerativeAI(geminiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
-
     const kbContext = await getKBContext(message);
     const systemPrompt = `${getSystemPrompt()}\n\nKnowledge Base:\n${kbContext}`;
 
-    const result = await model.generateContent({
-      contents: [
-        { role: "user", parts: [{ text: getSystemPrompt() + "\n" + message }] }
+    const doEndpoint = process.env.DO_AGENT_ENDPOINT;
+    const doKey = process.env.DO_AGENT_ACCESS_KEY;
+
+    if (!doEndpoint) {
+      return res.status(500).json({ error: "DigitalOcean agent endpoint not configured" });
+    }
+
+    const payload = {
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: message }
       ]
+    };
+
+    const headers = { "Content-Type": "application/json" };
+    if (doKey) headers["Authorization"] = `Bearer ${doKey}`;
+
+    const resp = await fetch(doEndpoint, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(payload)
     });
 
-    console.log("Gemini API raw result:", JSON.stringify(result, null, 2));
+    if (!resp.ok) {
+      const textDump = await resp.text().catch(() => "<no body>");
+      throw new Error(`DigitalOcean agent error ${resp.status}: ${textDump}`);
+    }
 
-    const text = result?.candidates?.[0]?.content?.parts?.[0]?.text
-      || result?.response?.candidates?.[0]?.content?.parts?.[0]?.text;
+    let json;
+    try {
+      json = await resp.json();
+    } catch (e) {
+      json = { text: await resp.text() };
+    }
 
-    if (!text) throw new Error("No text returned from Gemini API");
+    const reply =
+      json?.output?.text ||
+      json?.text ||
+      json?.response ||
+      (typeof json === "string" ? json : null) ||
+      json?.choices?.[0]?.message?.content ||
+      json?.choices?.[0]?.text ||
+      (json && JSON.stringify(json));
 
-    res.status(200).send({ response: text });
+    if (!reply) throw new Error("No reply from DigitalOcean agent");
+
+    return res.status(200).json({ response: String(reply) });
   } catch (error) {
-    console.error("Gemini API Error:", error);
-    res.status(500).send({ error: error.message || "Unable to get response from Gemini" });
+    console.error("Chatbot API Error:", error);
+    res.status(500).json({ error: error.message || "Unable to get response from chatbot backend" });
   }
 });
 
-// -----------------------------
+// =======================================================
 // Contact Form Endpoint
-// -----------------------------
-exports.contact = onRequest({ secrets: ["GMAIL_EMAIL", "GMAIL_APP_PASS"] }, async (req, res) => {
-  setCorsHeaders(res);
-
-  if (req.method === "OPTIONS") {
-    res.status(204).send("");
-    return;
-  }
-
-  if (req.method !== "POST") {
-    res.status(405).send("Method Not Allowed");
-    return;
-  }
-
+// =======================================================
+app.post("/api/contact", async (req, res) => {
   const { name, email, message } = req.body;
   if (!name || !email || !message) {
-    res.status(400).send({ error: "Missing one or more required fields: name, email, message" });
-    return;
+    return res.status(400).json({ error: "Missing one or more required fields: name, email, message" });
   }
 
   try {
     const user = process.env.GMAIL_EMAIL;
     const pass = process.env.GMAIL_APP_PASS;
+
+    if (!user || !pass) {
+      throw new Error("Gmail credentials not configured");
+    }
 
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -112,9 +122,17 @@ exports.contact = onRequest({ secrets: ["GMAIL_EMAIL", "GMAIL_APP_PASS"] }, asyn
     };
 
     await transporter.sendMail(mailOptions);
-    res.status(200).send({ message: "Message sent successfully!" });
+    res.status(200).json({ message: "Message sent successfully!" });
   } catch (error) {
     console.error("Error sending email:", error);
-    res.status(500).send({ error: "Failed to send message." });
+    res.status(500).json({ error: "Failed to send message." });
   }
+});
+
+// =======================================================
+// Start Express App
+// =======================================================
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`FK-Bot backend running on port ${PORT}`);
 });
