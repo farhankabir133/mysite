@@ -134,8 +134,14 @@ Instead of replacing everything:
 
 ## PR Description Template (Copy-Paste Ready)
 
+> ⚠️ **WARNING:** The description below uses the title/summary from requirements but doesn't accurately reflect the scope of changes. Consider adding a disclaimer or revising the description to clearly state this is a complete architectural rewrite.
+
 ```markdown
-## Summary
+## ⚠️ IMPORTANT: This PR Replaces Entire Frontend with Backend Only
+
+This PR completely removes the React frontend application and replaces it with a standalone Node.js backend. 76 files are changed, with 73 files deleted including all UI components, pages, and frontend logic.
+
+## Summary (From Requirements)
 
 Fixed user authentication issue causing login failures. Refactored API endpoints for consistency and added error handling for database queries.
 

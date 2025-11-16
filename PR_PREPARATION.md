@@ -13,6 +13,8 @@
 
 ## PR Description
 
+> ⚠️ **IMPORTANT DISCLAIMER:** The title and description below were provided in the requirements. However, the actual changes in this PR are much more extensive than described. This PR completely replaces the frontend React application with a backend-only Node.js server, deleting 73 files. Review the "What This PR Actually Does" section below for accurate information.
+
 ### Summary
 Fixed user authentication issue causing login failures. Refactored API endpoints for consistency and added error handling for database queries.
 
