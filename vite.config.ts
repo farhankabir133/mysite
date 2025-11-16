@@ -4,14 +4,12 @@ import path from 'path';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  // Base public path. Historically this project set the base to '/mysite/'
-  // for GitHub Pages when serving from https://<user>.github.io/mysite/.
-  // When a custom domain (or user-pages root) is used the base should be
-  // '/' (or the root). To make deployments flexible we allow overriding
-  // the base with the VITE_BASE environment variable. Examples:
-  //  - default (custom domain or user site): VITE_BASE not set -> '/'
-  //  - GitHub Pages project site: VITE_BASE=/mysite/ npm run build
-  base: process.env.VITE_BASE || '/',
+  // Base public path when served from GitHub Pages. Set to the repository
+  // name so static assets resolve correctly when the site is served from
+  // https://<user>.github.io/<repo>/ (example: '/mysite/').
+  // If you deploy to a different repo or a user site, adjust this value or
+  // override via an environment variable.
+  base: '/mysite/',
   plugins: [react()],
   resolve: {
     alias: {
@@ -26,9 +24,6 @@ export default defineConfig({
     exclude: ['lucide-react'],
   },
   build: {
-  // Keep source maps disabled in production builds to avoid exposing
-  // source code. Reverted after debugging.
-  sourcemap: false,
     rollupOptions: {
       output: {
         // Bundle all node_modules into a single vendor chunk. This reduces the

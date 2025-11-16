@@ -130,8 +130,8 @@ const Skills: React.FC = () => {
 
               {/* Circular Progress */}
               <div className="mt-4 flex justify-center">
-                <div className="relative w-16 h-16">
-                  <svg className="w-16 h-16 transform -rotate-90" viewBox="0 0 64 64">
+                <div className="relative w-12 h-12 sm:w-16 sm:h-16">
+                  <svg className="w-12 h-12 sm:w-16 sm:h-16 transform -rotate-90" viewBox="0 0 64 64">
                     <circle
                       cx="32"
                       cy="32"
@@ -165,7 +165,7 @@ const Skills: React.FC = () => {
                     </defs>
                   </svg>
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-xs font-bold text-slate-900 dark:text-white">
+                    <span className="text-[10px] sm:text-xs font-bold text-slate-900 dark:text-white">
                       {skill.level}%
                     </span>
                   </div>

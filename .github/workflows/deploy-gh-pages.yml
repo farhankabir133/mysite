@@ -45,24 +45,19 @@ jobs:
             echo "No CUSTOM_DOMAIN secret set; skipping CNAME write."
           fi
 
-      - name: Deploy to gh-pages (git push)
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Upload built site as Pages artifact
+        uses: actions/upload-pages-artifact@v1
         with:
-          github_token: ${{ secrets.GH_PAGES_PAT || secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
-          publish_branch: gh-pages
-          allow_empty_commit: true
-          keep_files: false
-          force_orphan: false
-          exclude_assets: .github
+          path: ./dist
 
-      - name: Debug GH_PAGES_PAT presence
-        run: |
-          if [ -n "${{ secrets.GH_PAGES_PAT }}" ]; then
-            echo "GH_PAGES_PAT is set"
-          else
-            echo "GH_PAGES_PAT is NOT set"
-          fi
+      - name: Deploy to GitHub Pages (via Pages API)
+        uses: actions/deploy-pages@v1
+        # This action uses the workflow's GITHUB_TOKEN and the Pages API
+        # to create a deployment; it avoids doing a direct git push and
+        # therefore does not require a PAT. If your organization blocks
+        # the built-in token for Pages, you can still set GH_PAGES_PAT and
+        # we can revert to the peaceiris action, but this is the recommended
+        # and more robust approach.
 
       - name: Smoke test deployed site
         if: success()

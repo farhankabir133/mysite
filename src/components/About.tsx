@@ -53,14 +53,14 @@ const About: React.FC = () => {
                 className="relative w-full h-auto object-cover rounded-2xl shadow-2xl transform rotate-3 hover:rotate-0 transition-transform duration-300"
               />
               <motion.div
-                className="absolute -top-4 -right-4 w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 bg-amber-400 rounded-full flex items-center justify-center shadow-lg"
+                className="hidden sm:flex absolute -top-4 -right-4 w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 bg-amber-400 rounded-full flex items-center justify-center shadow-lg"
                 animate={{ y: [0, -10, 0] }}
                 transition={{ duration: 4, repeat: Infinity, repeatType: 'mirror' }}
               >
                 <span className="text-xl sm:text-2xl">🚀</span>
               </motion.div>
               <motion.div
-                className="absolute -bottom-4 -left-4 w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-blue-500 rounded-full flex items-center justify-center shadow-lg"
+                className="hidden sm:flex absolute -bottom-4 -left-4 w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-blue-500 rounded-full flex items-center justify-center shadow-lg"
                 animate={{ y: [0, 10, 0] }}
                 transition={{ duration: 4, repeat: Infinity, delay: 1, repeatType: 'mirror' }}
               >

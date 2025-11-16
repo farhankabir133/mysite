@@ -48,6 +48,5 @@ set_secret_if_env VITE_FIREBASE_PROJECT_ID VITE_FIREBASE_PROJECT_ID
 set_secret_if_env VITE_FIREBASE_APP_ID VITE_FIREBASE_APP_ID
 set_secret_if_env VITE_WALLETCONNECT_PROJECT_ID VITE_WALLETCONNECT_PROJECT_ID
 set_secret_if_env CUSTOM_DOMAIN CUSTOM_DOMAIN
-set_secret_if_env GH_PAGES_PAT GH_PAGES_PAT
 
 echo "Done. Verify secrets in the repository Settings → Secrets → Actions." 
