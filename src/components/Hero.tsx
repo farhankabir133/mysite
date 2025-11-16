@@ -12,9 +12,9 @@ const Hero: React.FC = () => {
   };
 
   return (
-    <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black">
+  <section id="home" className="relative min-h-[100svh] flex items-center justify-center overflow-hidden bg-black full-vh">
       <GravityCodeOrbsBackground />
-      <div className="relative z-10 flex flex-col items-center justify-center w-full h-full pt-32 pb-16">
+  <div className="relative z-10 flex flex-col items-center justify-center w-full h-full pt-20 sm:pt-32 pb-16">
         <motion.div
           className="mb-2"
           initial={{ opacity: 0, y: -24 }}
@@ -71,7 +71,7 @@ const Hero: React.FC = () => {
         >
           <motion.button
             onClick={() => document.querySelector('#portfolio')?.scrollIntoView({ behavior: 'smooth' })}
-            className="group relative px-8 py-4 bg-gradient-to-r from-amber-400 to-orange-500 text-white rounded-full overflow-hidden shadow-lg cursor-pointer"
+            className="group relative px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-amber-400 to-orange-500 text-white rounded-full overflow-hidden shadow-lg cursor-pointer"
             whileHover={{ scale: 1.05, y: -2 }}
             whileTap={{ scale: 0.95 }}
           >
@@ -86,7 +86,7 @@ const Hero: React.FC = () => {
           <motion.a
             href="/Resume_of_FK.pdf"
             download
-            className="group flex items-center gap-2 px-8 py-4 border-2 border-amber-400 text-amber-400 rounded-full hover:bg-amber-400 hover:text-slate-900 transition-all duration-300 cursor-pointer"
+            className="group flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-4 border-2 border-amber-400 text-amber-400 rounded-full hover:bg-amber-400 hover:text-slate-900 transition-all duration-300 cursor-pointer"
             whileHover={{ scale: 1.05, y: -2 }}
             whileTap={{ scale: 0.95 }}
           >

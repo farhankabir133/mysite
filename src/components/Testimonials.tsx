@@ -55,7 +55,7 @@ const Testimonials: React.FC = () => {
                 transition={{ duration: 0.4, ease: 'easeInOut' }}
                 className="bg-white dark:bg-slate-700 rounded-2xl p-6 sm:p-8 md:p-12 shadow-xl relative"
               >
-                <Quote className="absolute top-4 left-4 sm:top-6 sm:left-6 w-8 h-8 text-amber-400 opacity-20" />
+                <Quote className="hidden sm:block absolute top-4 left-4 sm:top-6 sm:left-6 w-8 h-8 text-amber-400 opacity-20" />
                 
                 <div className="flex justify-center mb-4 sm:mb-6">
                   {[...Array(testimonials[currentIndex].rating)].map((_, i) => (

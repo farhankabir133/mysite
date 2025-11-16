@@ -94,14 +94,15 @@ const Portfolio: React.FC = () => {
                   <img src={project.image} alt={project.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                   <div className="absolute inset-0 flex flex-col justify-end p-4">
-                    <div className="flex gap-2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    {/* Always show on small (touch) devices; hide on hover-only sizes until hovered */}
+                    <div className="flex gap-2 mb-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300">
                       {project.liveUrl && <motion.a href={project.liveUrl} target="_blank" rel="noopener noreferrer" className="p-2 bg-white/20 backdrop-blur-sm rounded-full text-white hover:bg-white/30 transition-colors duration-200" whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }} data-cursor="pointer"><ExternalLink className="w-4 h-4" /></motion.a>}
                       {project.githubUrl && <motion.a href={project.githubUrl} target="_blank" rel="noopener noreferrer" className="p-2 bg-white/20 backdrop-blur-sm rounded-full text-white hover:bg-white/30 transition-colors duration-200" whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }} data-cursor="pointer"><Github className="w-4 h-4" /></motion.a>}
                     </div>
                   </div>
                   {project.featured && <div className="absolute top-4 left-4"><span className="px-3 py-1 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs sm:text-sm rounded-full">Featured</span></div>}
                 </div>
-                <div className="p-4 sm:p-6">
+                  <div className="p-4 sm:p-6">
                   <div className="flex items-center gap-2 mb-3"><span className="px-3 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs sm:text-sm rounded-full">{project.category}</span></div>
                   <h3 className="text-lg sm:text-xl text-slate-900 dark:text-white mb-2 group-hover:text-amber-500 transition-colors duration-200">{project.title}</h3>
                   <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 mb-4 line-clamp-2">{project.description}</p>
@@ -109,7 +110,7 @@ const Portfolio: React.FC = () => {
                     {project.technologies.slice(0, 3).map((tech) => <span key={tech} className="px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300 text-xs rounded">{tech}</span>)}
                     {project.technologies.length > 3 && <span className="px-2 py-1 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs rounded">+{project.technologies.length - 3}</span>}
                   </div>
-                  <motion.button onClick={() => setSelectedProject(project.id)} className="w-full py-2 bg-gradient-to-r from-amber-400 to-orange-500 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 text-sm sm:text-base" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} data-cursor="pointer">View Details</motion.button>
+                  <motion.button onClick={() => setSelectedProject(project.id)} className="w-full py-2 bg-gradient-to-r from-amber-400 to-orange-500 text-white rounded-lg opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-300 transform sm:translate-y-2 sm:group-hover:translate-y-0 text-sm sm:text-base" whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} data-cursor="pointer">View Details</motion.button>
                 </div>
               </motion.div>
             ))}
